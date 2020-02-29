@@ -26,10 +26,11 @@ unsigned int read_button(void)
 	unsigned int buttons = 0;
 	enum digital val;
 
-	//COMPLETAR: tomar el código de prácticas anteriores
+	// Tomar el código de prácticas anteriores
+
 	portG_read(6, &val);
 	if(val == LOW) buttons |= BUT1;
-
+	
 	portG_read(7, &val);
 	if(val == LOW) buttons |= BUT2;
 

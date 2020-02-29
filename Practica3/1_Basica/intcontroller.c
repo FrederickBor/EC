@@ -4,11 +4,11 @@
 **    intcontroller.c  3/3/2016
 **
 **    Estructura de Computadores
-**    Dpto. de Arquitectura de Computadores y Autom醫ica
-**    Facultad de Inform醫ica. Universidad Complutense de Madrid
+**    Dpto. de Arquitectura de Computadores y Autom谩tica
+**    Facultad de Inform谩tica. Universidad Complutense de Madrid
 **
-**  Prop髎ito:
-**    Contiene las implementaci髇 del m骴ulo intcontroller
+**  Prop贸sito:
+**    Contiene las implementaci贸n del m贸dulo intcontroller
 **
 **-----------------------------------------------------------------*/
 
@@ -18,10 +18,10 @@
 
 void ic_init(void)
 {
-	/* Configuraci髇 por defector del controlador de interrupciones:
+	/* Configuraci贸n por defector del controlador de interrupciones:
 	 *    Lineas IRQ y FIQ no habilitadas
 	 *    Linea IRQ en modo no vectorizado
-	 *    Todo por la l韓ea IRQ
+	 *    Todo por la l铆nea IRQ
 	 *    Todas las interrupciones enmascaradas
 	 **/
 	rINTMOD = 0x0; // Configura las linas como de tipo IRQ
@@ -37,19 +37,18 @@ int ic_conf_irq(enum enable st, enum int_vec vec)
 		return -1;
 
 	if (vec == VEC)
-		//COMPLETAR: poner la linea IRQ en modo vectorizado
-		conf &=~ (0x1 << 2);
-
+		// Poner la linea IRQ en modo vectorizado
+		conf |= (0x4);
 	else
-		//COMPLETAR: poner la linea IRQ en modo no vectorizado
-		conf |= (0x1 << 2);
+		// Poner la linea IRQ en modo no vectorizado
+		conf &= ~(0x4); 
 
 	if (st == ENABLE)
-		//COMPLETAR: habilitar la linea IRQ
-		conf &=~ (0x1 << 1);
+		// Habilitar la linea IRQ
+		conf |= (0x10);
 	else
-		//COMPLETAR: deshabilitar la linea IRQ
-		conf |= (0x1 << 1);
+		// Deshabilitar la linea IRQ
+		conf &= ~(0x10);
 
 	rINTCON = conf;
 	return 0;
@@ -58,16 +57,22 @@ int ic_conf_irq(enum enable st, enum int_vec vec)
 int ic_conf_fiq(enum enable st)
 {
 	int ret = 0;
+	int conf = rINTCON; // 驴Trabaja con el registro rINTCON?
 
-	if (st == ENABLE)
-		//COMPLETAR: habilitar la linea FIQ
-		rINTCON &=~ (0x1 << 0);
-	else if (st == DISABLE)
-		//COMPLETAR: deshabilitar la linea FIQ
-		rINTCON |= (0x1 << 0);
+	if (st == ENABLE){
+		// Habilitar la linea FIQ
+		conf |= (0x11);
+		rINTCON = conf;
+	}
+	else if (st == DISABLE){
+		// Deshabilitar la linea FIQ
+		conf &= ~(0x11);
+		rINTCON = conf;
+	}
 	else
 		ret = -1;
 
+	
 	return ret;
 }
 
@@ -81,12 +86,16 @@ int ic_conf_line(enum int_line line, enum int_mode mode)
 	if (mode != IRQ && mode != FIQ)
 		return -1;
 
+	int registro = rINTMOD;
+
 	if (mode == IRQ)
-		//COMPLETAR: poner la linea line en modo IRQ
-		rINTMOD &=~ (0x1 << bit);
+		// Poner la linea line en modo IRQ
+		registro &= ~bit;
 	else
-		//COMPLETAR: poner la linea line en modo FIQ
-		rINTMOD |= (0x1 << bit);
+		// Poner la linea line en modo FIQ
+		registro |= bit;
+	
+	rINTMOD = registro;
 
 	return 0;
 }
@@ -96,8 +105,11 @@ int ic_enable(enum int_line line)
 	if (line < 0 || line > 26)
 		return -1;
 
-	//COMPLETAR: habilitar las interrupciones por la linea line
-	rINTMSK &=~ (0x1 << line);
+	// Habilitar las interrupciones por la linea line
+	// ESTO SOLO ACTIVA EL LAS INT POR IRQ
+	int bit = INT_BIT(line);
+	rI_ISPR |= bit;
+	
 	return 0;
 }
 
@@ -106,9 +118,11 @@ int ic_disable(enum int_line line)
 	if (line < 0 || line > 26)
 		return -1;
 
-	//COMPLETAR: enmascarar las interrupciones por la linea line
-	rINTMSK |= (0x1 << line);
-	
+	// Enmascarar las interrupciones por la linea line
+	// ESTO SOLO DESACTIVA EL LAS INT POR IRQ
+	int bit = INT_BIT(line);
+	rI_ISPR &= ~bit;
+
 	return 0;
 }
 
@@ -122,14 +136,14 @@ int ic_cleanflag(enum int_line line)
 	bit = INT_BIT(line);
 
 	if (rINTMOD & bit)
-		//COMPLETAR: borrar el flag de interrupcion correspondiente a la linea line
+		// Borrar el flag de interrupcion correspondiente a la linea line
 		//con la linea configurada por FIQ
-		rF_ISPC = bit;
+		rF_ISPC |= bit;
 	else
-		//COMPLETAR: borrar el flag de interrupcion correspondiente a la linea line
+		// Borrar el flag de interrupcion correspondiente a la linea line
 		//con la linea configurada por IRQ
-		rI_ISPC = bit;
-
+		rI_ISPC |= bit;
+	
 	return 0;
 }
 

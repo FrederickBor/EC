@@ -71,13 +71,19 @@ void D8Led_init(void)
 void D8Led_segment(int value)
 {
 	if( (value >= 0) && (value < 8) )
-		//COMPLETAR: utilizar el código de prácticas anteirores
+		// Debemos escribir en el display (LED8ADDR) el valor
+		// correcto para que se ilumine el segmento que est� en la posici�n
+		// value del array Segmentes. Hay que tener en cuente que el display
+		// usa l�gica invertida (0 enciende, 1 apaga).
 		LED8ADDR = ~Segments[value];
 }
 
 void D8Led_digit(int value)
 {
 	if( (value >= 0) && (value < 16) )
-		//COMPLETAR: utilizar el código de la prácticas anteirores
+		// Debemos escribir en el display (LED8ADDR) el valor
+		// correcto para que se ilumine el d�gito que est� en la posici�n
+		// value del array Digits. Hay que tener en cuente que el display
+		// usa l�gica invertida (0 enciende, 1 apaga).
 		LED8ADDR = ~Digits[value];
 }

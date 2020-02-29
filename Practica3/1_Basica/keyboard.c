@@ -31,11 +31,28 @@ int kb_scan(void)
 		temp = *(keyboard_base+lines[i]);
 
 		if(( temp & KEY_VALUE_MASK) != KEY_VALUE_MASK) {
-			//COMPLETAR: 
-			//      si está el bit 1 a 0 la tecla es la map[i][3]
-			//      si está el bit 2 a 0 la tecla es la map[i][2]
-			//      si está el bit 3 a 0 la tecla es la map[i][1]
-			//      si está el bit 4 a 0 la tecla es la map[i][0]
+			switch (temp & KEY_VALUE_MASK){
+			// si está el bit 1 a 0 la tecla es la map[i][3]
+			case 0xE:
+				value = map[i][3];
+				break;
+			// si está el bit 2 a 0 la tecla es la map[i][2]
+			case 0xD:
+				value = map[i][2];
+				break;
+			// si está el bit 3 a 0 la tecla es la map[i][1]
+			case 0xB:
+				value = map[i][1];
+				break;
+			// si está el bit 4 a 0 la tecla es la map[i][0]
+			case 0x7:
+				value = map[i][0];
+				break;
+			default:
+				value = -1;
+				break;
+			}
+
 		}
 	}
 
