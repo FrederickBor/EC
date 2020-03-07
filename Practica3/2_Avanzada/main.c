@@ -9,6 +9,9 @@
 #include "gpio.h"
 #include "keyboard.h"
 
+#define LETRA_E 14
+#define LETRA_C 12
+
 struct RLstat {
 	int moving;
 	int speed;
@@ -24,6 +27,7 @@ static struct RLstat RL = {
 };
 
 static int contBUT2 = 0;
+static int contTIMER2 = 0;
 
 void timer_ISR(void) __attribute__ ((interrupt ("IRQ")));
 void timer2_ISR(void) __attribute__ ((interrupt ("IRQ")));
@@ -50,6 +54,21 @@ void timer_ISR(void)
 	D8Led_segment(RL.position);
 	ic_cleanflag(INT_TIMER0);
 }
+
+void timer2_ISR(void)
+{
+	if (contTIMER2 % 4 == 0) {
+		D8Led_digit(LETRA_E);
+		Delay(200);
+		D8Led_digit(LETRA_C);
+		Delay(200);
+	}
+
+	contTIMER2++;
+
+	ic_cleanflag(INT_TIMER2);
+}
+
 
 void button_ISR(void)
 {
@@ -163,6 +182,11 @@ int setup(void)
 	leds_init();
 	D8Led_init();
 
+	D8Led_digit(LETRA_E);
+	Delay(200);
+	D8Led_digit(LETRA_C);
+	Delay(200);
+
 	D8Led_segment(RL.position);
 
 	/* Port G: configuración para generación de interrupciones externas,
@@ -198,14 +222,23 @@ int setup(void)
 	tmr_update(TIMER0);
 	tmr_stop(TIMER0);
 
+	tmr_set_prescaler(2, 255);
+	tmr_set_divider(TIMER2, D1_8);
+	tmr_set_count(TIMER2, 62500, 0);
+	tmr_set_mode(TIMER2, RELOAD);
+	tmr_update(TIMER2);
+	tmr_stop(TIMER2);
+
 	//if (RL.moving)
 	tmr_start(TIMER0);
+	tmr_start(TIMER2);
 
 	/***************************/
 
 
 	// Registramos las ISRs
 	pISR_TIMER0   = (unsigned) timer_ISR;// Registrar la RTI del timer
+	pISR_TIMER2 = (unsigned) timer2_ISR;
 	pISR_EINT4567 = (unsigned) button_ISR;// Registrar la RTI de los botones
 	pISR_EINT1    = (unsigned) keyboard_ISR;// Registrar la RTI del teclado
 
@@ -224,12 +257,16 @@ int setup(void)
 	ic_conf_fiq(DISABLE);
 	// configurar la línea INT_TIMER0 en modo IRQ
 	ic_conf_line(INT_TIMER0,IRQ);
+	// configurar la línea INT_TIMER2 en modo IRQ
+	ic_conf_line(INT_TIMER2,IRQ);
 	// configurar la línea INT_EINT4567 en modo IRQ
 	ic_conf_line(INT_EINT4567,IRQ);
 	// configurar la línea INT_EINT1 en modo IRQ
 	ic_conf_line(INT_EINT1,IRQ);
 	// habilitar la línea INT_TIMER0
 	ic_enable(INT_TIMER0);
+	// habilitar la línea INT_TIMER2
+	ic_enable(INT_TIMER2);
 	// habilitar la línea INT_EINT4567
 	ic_enable(INT_EINT4567);
 	// habilitar la línea INT_EINT1
