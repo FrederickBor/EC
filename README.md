@@ -8,6 +8,10 @@ la asignatura EC en mis estudios en la UCM.
 Este repositorio esta organizado una carpeta por cada 
 practica de laboratorio realizada.
 
+# Autor.
+
+[Frederick Ernesto Borges Noronha](https://github.com/FrederickBor)
+
 # Licencia.
 
 El codigo presente en este repositio se encuentra bajo 
